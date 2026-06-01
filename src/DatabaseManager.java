@@ -1,13 +1,7 @@
-import javax.swing.*;
-import java.awt.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.*;
-import java.sql.Date;
-import java.time.LocalDate;
 import java.util.*;
-import java.util.List;
-import java.security.MessageDigest;
 
 public class DatabaseManager {
 
