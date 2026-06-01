@@ -14,6 +14,7 @@ public class SchoolClass {
 
     public void setId(int id) {
         this.id = id;
+
     }
 
     public String getClassName() {
