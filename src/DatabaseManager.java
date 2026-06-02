@@ -29,12 +29,34 @@ public class DatabaseManager {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
+    public static void ensureClassesTable() {
 
+        String sql =
+                "CREATE TABLE IF NOT EXISTS classes ("
+                        + "class_id INT AUTO_INCREMENT PRIMARY KEY, "
+                        + "class_name VARCHAR(10) NOT NULL UNIQUE"
+                        + ")";
 
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
 
+            stmt.execute(sql);
 
+            System.out.println("Classes table ready.");
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
+    ////////////// INITALIZATION ///////////////////////////////////////////////////////////////
+    public static void initDatabase() {
+        ensureClassesTable();
+        // later:
+        // ensureStudentsTable();
+        // ensureSubjectsTable();
+        // ensureGradesTable();
+    }
 
     }
 
