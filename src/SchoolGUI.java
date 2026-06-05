@@ -7,6 +7,10 @@ import java.util.List;
 
 public class SchoolGUI extends JFrame {
 
+    private DefaultListModel<SchoolClass> classListModel;
+    private JList<SchoolClass> classList;
+
+
     public void showClassesWindow() {
         // 1. Set a modern Look and Feel (FlatLaf)
         try {
@@ -27,7 +31,7 @@ public class SchoolGUI extends JFrame {
         mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
         mainPanel.setBackground(Color.WHITE);
 
-        // Modern styled button
+        // Button
         JButton addClassButton = new JButton("Add Class");
         addClassButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         addClassButton.setBackground(new Color(0, 122, 255)); // Modern Accent Blue
@@ -44,13 +48,16 @@ public class SchoolGUI extends JFrame {
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
-        DefaultListModel<SchoolClass> listModel = new DefaultListModel<>();
+       // DefaultListModel<SchoolClass> listModel = new DefaultListModel<>();
+
+        classListModel = new DefaultListModel<>();
+        classList = new JList<>(classListModel);
         for (SchoolClass schoolClass : dao.getAllClasses()) {
-            listModel.addElement(schoolClass);
+            classListModel.addElement(schoolClass);
         }
 
         // Modern styled JList
-        JList<SchoolClass> classList = new JList<>(listModel);
+        JList<SchoolClass> classList = new JList<>(classListModel);
         classList.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         classList.setSelectionBackground(new Color(230, 242, 255)); // Subtle blue selection
         classList.setSelectionForeground(new Color(0, 122, 255));
@@ -120,7 +127,7 @@ public class SchoolGUI extends JFrame {
 
             if (dao.addClass(className)) {
 
-                showClassesWindow();// refresh JList
+                refreshClassesList();// refresh JList
 
                 JOptionPane.showMessageDialog(
                         null,
@@ -138,6 +145,17 @@ public class SchoolGUI extends JFrame {
                         JOptionPane.ERROR_MESSAGE
                 );
             }
+        }
+    }
+
+    public void refreshClassesList() {
+
+        SchoolDAO dao = new SchoolDAO();
+
+        classListModel.clear();
+
+        for (SchoolClass schoolClass : dao.getAllClasses()) {
+            classListModel.addElement(schoolClass);
         }
     }
 
