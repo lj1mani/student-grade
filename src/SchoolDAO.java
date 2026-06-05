@@ -9,28 +9,48 @@ public class SchoolDAO {
 
     public boolean addClass(String className) {
 
-        // SQL query with placeholder (?) to prevent SQL injection
+        if (classExists(className)) {
+            return false; // already exists
+        }
+
+
         String sql = "INSERT INTO classes (class_name) VALUES (?)";
 
-        // try-with-resources automatically closes connection and statement
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            // set the class name into the SQL query
             pstmt.setString(1, className);
 
-            // execute insert and get number of affected rows
-            int rowsInserted = pstmt.executeUpdate();
-
-            // if at least 1 row is inserted → success
-            return rowsInserted > 0;
+            return pstmt.executeUpdate() > 0;
 
         } catch (SQLException e) {
 
-            // print error for debugging
-            System.out.println("Error while adding class: " + className);
-            e.printStackTrace();
+            // duplicate entry (MySQL error code 1062)
+            if (e.getErrorCode() == 1062) {
+                System.out.println("Class already exists: " + className);
+            } else {
+                e.printStackTrace();
+            }
 
+            return false;
+        }
+    }
+
+    public boolean classExists(String className) {
+
+        String sql = "SELECT 1 FROM classes WHERE class_name = ? LIMIT 1";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, className);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            return rs.next();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
             return false;
         }
     }

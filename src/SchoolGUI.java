@@ -137,13 +137,11 @@ public class SchoolGUI extends JFrame {
                 );
 
             } else {
+                JOptionPane.showMessageDialog(null,
+                        "Class already exists!",
+                        "Warning",
+                        JOptionPane.WARNING_MESSAGE);
 
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Failed to add class.",
-                        "Database Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
             }
         }
     }
