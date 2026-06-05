@@ -52,10 +52,6 @@ public class DatabaseManager {
     ////////////// INITALIZATION ///////////////////////////////////////////////////////////////
     public static void initDatabase() {
         ensureClassesTable();
-        // later:
-        // ensureStudentsTable();
-        // ensureSubjectsTable();
-        // ensureGradesTable();
     }
 
     }

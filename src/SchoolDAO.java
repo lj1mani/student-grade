@@ -7,6 +7,9 @@ import java.util.List;
 
 public class SchoolDAO {
 
+    /* ****************************************** */
+    /* ************ CLASSES ********************* */
+
     public boolean addClass(String className) {
 
         if (classExists(className)) {
@@ -55,9 +58,8 @@ public class SchoolDAO {
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////////////
-    // Returns all classes from database
 
+    // Returns all classes from database
     public List<SchoolClass> getAllClasses() {
 
         List<SchoolClass> classes = new ArrayList<>();
@@ -102,5 +104,56 @@ public class SchoolDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /* ******************************************* */
+    /* ************ STUDENST ********************* */
+
+    public boolean addStudent(String firstName, String lastName, int classId) {
+
+        String sql = "INSERT INTO students (first_name, last_name, class_id) VALUES (?, ?, ?)";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, firstName);
+            pstmt.setString(2, lastName);
+            pstmt.setInt(3, classId);
+
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<Student> getStudentsByClass(int classId) {
+
+        List<Student> students = new ArrayList<>();
+
+        String sql = "SELECT * FROM students WHERE class_id = ? ORDER BY last_name";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, classId);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                students.add(new Student(
+                        rs.getInt("student_id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getInt("class_id")
+                ));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return students;
     }
 }

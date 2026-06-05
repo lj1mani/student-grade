@@ -9,6 +9,7 @@ public class SchoolGUI extends JFrame {
 
     private DefaultListModel<SchoolClass> classListModel;
     private JList<SchoolClass> classList;
+    private SchoolClass lastSelectedClass = null;
 
 
     public void showClassesWindow() {
@@ -67,14 +68,30 @@ public class SchoolGUI extends JFrame {
         // JList
         JList<SchoolClass> classList = new JList<>(classListModel);
         classList.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        classList.setSelectionBackground(new Color(230, 242, 255)); // Subtle blue selection
+        classList.setSelectionBackground(new Color(230, 242, 255));
         classList.setSelectionForeground(new Color(0, 122, 255));
-        classList.setFixedCellHeight(40); // Gives items room to breathe
+        classList.setFixedCellHeight(40);
+
+        classList.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+
+                if (e.getClickCount() == 2) { // double click
+
+                    SchoolClass selected = classList.getSelectedValue();
+
+                    if (selected != null) {
+                        showStudentsWindow(selected);
+                    }
+                }
+            }
+        });
 
         JScrollPane scrollPane = new JScrollPane(classList);
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(225, 225, 225), 1));
 
         mainPanel.add(scrollPane, BorderLayout.CENTER);
+
 
         frame.add(mainPanel);
         frame.setVisible(true);
@@ -217,6 +234,77 @@ public class SchoolGUI extends JFrame {
                         "Error",
                         JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+
+    public void showStudentsWindow(SchoolClass schoolClass) {
+
+        SchoolDAO dao = new SchoolDAO();
+
+        JFrame frame = new JFrame("Students - " + schoolClass.getClassName());
+        frame.setSize(600, 500);
+        frame.setLocationRelativeTo(null);
+
+        DefaultListModel<Student> model = new DefaultListModel<>();
+
+        JList<Student> list = new JList<>(model);
+
+        refreshStudentsList(model, schoolClass.getId(), dao);
+
+        JButton addStudentButton = new JButton("Add Student");
+
+        addStudentButton.addActionListener(e -> showAddStudentDialog(schoolClass, model));
+
+        JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        top.add(addStudentButton);
+
+        frame.setLayout(new BorderLayout());
+        frame.add(top, BorderLayout.NORTH);
+        frame.add(new JScrollPane(list), BorderLayout.CENTER);
+
+        frame.setVisible(true);
+    }
+
+    private void refreshStudentsList(DefaultListModel<Student> model, int classId, SchoolDAO dao) {
+
+        model.clear();
+
+        for (Student s : dao.getStudentsByClass(classId)) {
+            model.addElement(s);
+        }
+    }
+
+    public void showAddStudentDialog(SchoolClass schoolClass, DefaultListModel<Student> model) {
+
+        JTextField firstName = new JTextField(10);
+        JTextField lastName = new JTextField(10);
+
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+
+        panel.add(new JLabel("First Name:"));
+        panel.add(firstName);
+
+        panel.add(new JLabel("Last Name:"));
+        panel.add(lastName);
+
+        int result = JOptionPane.showConfirmDialog(
+                null,
+                panel,
+                "Add Student",
+                JOptionPane.OK_CANCEL_OPTION
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+
+            SchoolDAO dao = new SchoolDAO();
+
+            dao.addStudent(
+                    firstName.getText(),
+                    lastName.getText(),
+                    schoolClass.getId()
+            );
+
+            refreshStudentsList(model, schoolClass.getId(), dao);
         }
     }
 

@@ -4,8 +4,7 @@ import java.awt.*;
 
 public class main {
     public static void main(String[] args) {
-
-        // Apply FlatLaf theme
+        
         try {
             UIManager.setLookAndFeel(new FlatLightLaf());
         } catch (Exception e) {
