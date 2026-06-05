@@ -12,6 +12,9 @@ public class SchoolGUI extends JFrame {
     private SchoolClass lastSelectedClass = null;
 
 
+    /* ******************************************* */
+    /* ************ CLASS ********************* */
+
     public void showClassesWindow() {
         try {
             UIManager.setLookAndFeel(new FlatLightLaf());
@@ -66,7 +69,6 @@ public class SchoolGUI extends JFrame {
         }
 
         // JList
-        JList<SchoolClass> classList = new JList<>(classListModel);
         classList.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         classList.setSelectionBackground(new Color(230, 242, 255));
         classList.setSelectionForeground(new Color(0, 122, 255));
@@ -237,6 +239,9 @@ public class SchoolGUI extends JFrame {
         }
     }
 
+    /* ******************************************* */
+    /* ************ STUDENST ********************* */
+
     public void showStudentsWindow(SchoolClass schoolClass) {
 
         SchoolDAO dao = new SchoolDAO();
@@ -252,6 +257,12 @@ public class SchoolGUI extends JFrame {
         refreshStudentsList(model, schoolClass.getId(), dao);
 
         JButton addStudentButton = new JButton("Add Student");
+        addStudentButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        addStudentButton.setBackground(new Color(0, 122, 255));
+        addStudentButton.setForeground(Color.WHITE);
+        addStudentButton.setFocusPainted(false);
+        addStudentButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        addStudentButton.setMargin(new Insets(8, 16, 8, 16));
 
         addStudentButton.addActionListener(e -> showAddStudentDialog(schoolClass, model));
 
