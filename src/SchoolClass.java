@@ -9,7 +9,7 @@ public class SchoolClass {
     }
 
     public int getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(int id) {

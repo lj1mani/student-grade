@@ -1,9 +1,10 @@
 import com.formdev.flatlaf.FlatLightLaf;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.List;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 
 public class SchoolGUI extends JFrame {
 
@@ -16,6 +17,7 @@ public class SchoolGUI extends JFrame {
     /* ************ CLASS ********************* */
 
     public void showClassesWindow() {
+
         try {
             UIManager.setLookAndFeel(new FlatLightLaf());
         } catch (Exception ex) {
@@ -29,12 +31,12 @@ public class SchoolGUI extends JFrame {
         frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
 
-        // Main layout with clean padding around the edges
+        // MAIN PANEL
         JPanel mainPanel = new JPanel(new BorderLayout(0, 15));
         mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
         mainPanel.setBackground(Color.WHITE);
 
-        // Buttons
+        // TOP BUTTONS
         JButton addClassButton = new JButton("Add Class");
         addClassButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         addClassButton.setBackground(new Color(0, 122, 255));
@@ -42,7 +44,6 @@ public class SchoolGUI extends JFrame {
         addClassButton.setFocusPainted(false);
         addClassButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         addClassButton.setMargin(new Insets(8, 16, 8, 16));
-
 
         JButton deleteClassButton = new JButton("Delete Class");
         deleteClassButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -52,48 +53,91 @@ public class SchoolGUI extends JFrame {
         deleteClassButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         deleteClassButton.setMargin(new Insets(8, 16, 8, 16));
 
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         topPanel.setBackground(Color.WHITE);
         topPanel.add(addClassButton);
         topPanel.add(deleteClassButton);
-        addClassButton.addActionListener(e -> showAddClassDialog());
-        deleteClassButton.addActionListener(e -> showDeleteClassDialog());
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
+        // TABLE MODEL
+        String[] columns = {"ID","Class Name"};
 
-        classListModel = new DefaultListModel<>();
-        classList = new JList<>(classListModel);
-        for (SchoolClass schoolClass : dao.getAllClasses()) {
-            classListModel.addElement(schoolClass);
+        DefaultTableModel model = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        // LOAD DATA
+        for (SchoolClass sc : dao.getAllClasses()) {
+            model.addRow(new Object[]{
+                   sc.getId(),
+                    sc.getClassName()
+            });
         }
 
-        // JList
-        classList.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        classList.setSelectionBackground(new Color(230, 242, 255));
-        classList.setSelectionForeground(new Color(0, 122, 255));
-        classList.setFixedCellHeight(40);
+        // TABLE
+        JTable table = new JTable(model);
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        table.setRowHeight(35);
+        table.setShowGrid(false);
+        table.setIntercellSpacing(new Dimension(0, 0));
+        table.setSelectionBackground(new Color(230, 242, 255));
+        table.setSelectionForeground(new Color(0, 122, 255));
+        table.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        classList.addMouseListener(new java.awt.event.MouseAdapter() {
+        JTableHeader header = table.getTableHeader();
+        header.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        header.setBackground(new Color(245, 245, 245));
+        header.setReorderingAllowed(false);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE);
+
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // DOUBLE CLICK -> OPEN STUDENTS
+        table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
+                if (e.getClickCount() == 2) {
 
-                if (e.getClickCount() == 2) { // double click
+                    int row = table.getSelectedRow();
 
-                    SchoolClass selected = classList.getSelectedValue();
+                    if (row != -1) {
+                        int id = (int) table.getValueAt(row, 0);
+                        String name = (String) table.getValueAt(row, 1);
 
-                    if (selected != null) {
+                        SchoolClass selected = new SchoolClass(id, name);
                         showStudentsWindow(selected);
                     }
                 }
             }
         });
 
-        JScrollPane scrollPane = new JScrollPane(classList);
-        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(225, 225, 225), 1));
+        // BUTTON ACTIONS
+        addClassButton.addActionListener(e -> {
+            showAddClassDialog();
+            refreshClassesList();
+        });
 
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        deleteClassButton.addActionListener(e -> {
+            int row = table.getSelectedRow();
 
+            if (row == -1) {
+                JOptionPane.showMessageDialog(frame, "Select a class to delete!");
+                return;
+            }
+
+            int id = (int) table.getValueAt(row, 0);
+
+            dao.deleteClass(id);
+
+            model.removeRow(row);
+        });
 
         frame.add(mainPanel);
         frame.setVisible(true);
