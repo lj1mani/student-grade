@@ -25,10 +25,10 @@ public class SchoolClass {
         this.className = className;
     }
 
-    /*
+
     @Override
     public String toString() {
         return className;
     }
-    */
+
 }

@@ -28,10 +28,10 @@ public class Student {
         return schoolClass;
     }
 
-    /*
+
     @Override
     public String toString() {
         return firstName + " " + lastName;
     }
-    */
+
 }
