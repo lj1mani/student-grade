@@ -12,7 +12,6 @@ public class SchoolGUI extends JFrame {
 
 
     public void showClassesWindow() {
-        // 1. Set a modern Look and Feel (FlatLaf)
         try {
             UIManager.setLookAndFeel(new FlatLightLaf());
         } catch (Exception ex) {
@@ -31,24 +30,33 @@ public class SchoolGUI extends JFrame {
         mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
         mainPanel.setBackground(Color.WHITE);
 
-        // Button
+        // Buttons
         JButton addClassButton = new JButton("Add Class");
         addClassButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        addClassButton.setBackground(new Color(0, 122, 255)); // Modern Accent Blue
+        addClassButton.setBackground(new Color(0, 122, 255));
         addClassButton.setForeground(Color.WHITE);
         addClassButton.setFocusPainted(false);
         addClassButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        // Optional: Add padding inside the button
         addClassButton.setMargin(new Insets(8, 16, 8, 16));
+
+
+        JButton deleteClassButton = new JButton("Delete Class");
+        deleteClassButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        deleteClassButton.setBackground(new Color(220, 53, 69));
+        deleteClassButton.setForeground(Color.WHITE);
+        deleteClassButton.setFocusPainted(false);
+        deleteClassButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        deleteClassButton.setMargin(new Insets(8, 16, 8, 16));
 
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         topPanel.setBackground(Color.WHITE);
         topPanel.add(addClassButton);
+        topPanel.add(deleteClassButton);
         addClassButton.addActionListener(e -> showAddClassDialog());
+        deleteClassButton.addActionListener(e -> showDeleteClassDialog());
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
-       // DefaultListModel<SchoolClass> listModel = new DefaultListModel<>();
 
         classListModel = new DefaultListModel<>();
         classList = new JList<>(classListModel);
@@ -56,15 +64,12 @@ public class SchoolGUI extends JFrame {
             classListModel.addElement(schoolClass);
         }
 
-        // Modern styled JList
+        // JList
         JList<SchoolClass> classList = new JList<>(classListModel);
         classList.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         classList.setSelectionBackground(new Color(230, 242, 255)); // Subtle blue selection
         classList.setSelectionForeground(new Color(0, 122, 255));
         classList.setFixedCellHeight(40); // Gives items room to breathe
-
-        // Add internal padding to list items via a custom renderer wrapper if needed,
-        // but FlatLaf handles basic JList padding beautifully out of the box.
 
         JScrollPane scrollPane = new JScrollPane(classList);
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(225, 225, 225), 1));
@@ -154,6 +159,64 @@ public class SchoolGUI extends JFrame {
 
         for (SchoolClass schoolClass : dao.getAllClasses()) {
             classListModel.addElement(schoolClass);
+        }
+    }
+
+    public void showDeleteClassDialog() {
+
+        SchoolDAO dao = new SchoolDAO();
+
+        List<SchoolClass> classes = dao.getAllClasses();
+
+        DefaultListModel<SchoolClass> model = new DefaultListModel<>();
+
+        for (SchoolClass c : classes) {
+            model.addElement(c);
+        }
+
+        JList<SchoolClass> list = new JList<>(model);
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        JScrollPane scrollPane = new JScrollPane(list);
+        scrollPane.setPreferredSize(new Dimension(300, 200));
+
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.add(new JLabel("Select class to delete:"), BorderLayout.NORTH);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        int result = JOptionPane.showConfirmDialog(
+                null,
+                panel,
+                "Delete Class",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+
+            SchoolClass selected = list.getSelectedValue();
+
+            if (selected == null) {
+                JOptionPane.showMessageDialog(null,
+                        "Please select a class!",
+                        "Warning",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            boolean deleted = dao.deleteClass(selected.getId());
+
+            if (deleted) {
+                refreshClassesList();
+
+                JOptionPane.showMessageDialog(null,
+                        "Class deleted successfully!");
+            } else {
+                JOptionPane.showMessageDialog(null,
+                        "Error deleting class!",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 

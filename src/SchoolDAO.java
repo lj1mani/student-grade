@@ -86,4 +86,21 @@ public class SchoolDAO {
 
         return classes;
     }
+
+    public boolean deleteClass(int classId) {
+
+        String sql = "DELETE FROM classes WHERE class_id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, classId);
+
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
