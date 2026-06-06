@@ -156,4 +156,21 @@ public class SchoolDAO {
 
         return students;
     }
+
+    public void deleteStudent(int studentId) {
+
+        String sql = "DELETE FROM students WHERE id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, studentId);
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }

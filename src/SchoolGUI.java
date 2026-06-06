@@ -8,10 +8,10 @@ import javax.swing.table.JTableHeader;
 
 public class SchoolGUI extends JFrame {
 
+
     private DefaultListModel<SchoolClass> classListModel;
     private JList<SchoolClass> classList;
     private SchoolClass lastSelectedClass = null;
-
 
     /* ******************************************* */
     /* ************ CLASS ********************* */
@@ -60,88 +60,86 @@ public class SchoolGUI extends JFrame {
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
-        // TABLE MODEL
-        String[] columns = {"ID","Class Name"};
+        // LIST MODEL
+        DefaultListModel<SchoolClass> listModel = new DefaultListModel<>();
+        JList<SchoolClass> classList = new JList<>(listModel);
 
-        DefaultTableModel model = new DefaultTableModel(columns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
+        classList.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        classList.setSelectionBackground(new Color(230, 242, 255));
+        classList.setSelectionForeground(new Color(0, 122, 255));
+        classList.setFixedCellHeight(35);
 
-        // LOAD DATA
-        for (SchoolClass sc : dao.getAllClasses()) {
-            model.addRow(new Object[]{
-                   sc.getId(),
-                    sc.getClassName()
-            });
-        }
-
-        // TABLE
-        JTable table = new JTable(model);
-        table.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        table.setRowHeight(35);
-        table.setShowGrid(false);
-        table.setIntercellSpacing(new Dimension(0, 0));
-        table.setSelectionBackground(new Color(230, 242, 255));
-        table.setSelectionForeground(new Color(0, 122, 255));
-        table.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        JTableHeader header = table.getTableHeader();
-        header.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        header.setBackground(new Color(245, 245, 245));
-        header.setReorderingAllowed(false);
-
-        JScrollPane scrollPane = new JScrollPane(table);
+        JScrollPane scrollPane = new JScrollPane(classList);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setBackground(Color.WHITE);
 
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
+        // LOAD DATA METHOD (IMPORTANT)
+        Runnable loadClasses = () -> {
+            listModel.clear();
+            for (SchoolClass sc : dao.getAllClasses()) {
+                listModel.addElement(sc);
+            }
+        };
+
+        loadClasses.run();
+
+        // MAKE JLIST SHOW NAME ONLY
+        classList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
+            JLabel label = new JLabel(value.getClassName());
+            label.setOpaque(true);
+
+            if (isSelected) {
+                label.setBackground(new Color(230, 242, 255));
+                label.setForeground(new Color(0, 122, 255));
+            } else {
+                label.setBackground(Color.WHITE);
+                label.setForeground(Color.BLACK);
+            }
+
+            return label;
+        });
+
         // DOUBLE CLICK -> OPEN STUDENTS
-        table.addMouseListener(new java.awt.event.MouseAdapter() {
+        classList.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 if (e.getClickCount() == 2) {
 
-                    int row = table.getSelectedRow();
+                    SchoolClass selected = classList.getSelectedValue();
 
-                    if (row != -1) {
-                        int id = (int) table.getValueAt(row, 0);
-                        String name = (String) table.getValueAt(row, 1);
-
-                        SchoolClass selected = new SchoolClass(id, name);
+                    if (selected != null) {
                         showStudentsWindow(selected);
                     }
                 }
             }
         });
 
-        // BUTTON ACTIONS
+        // ADD CLASS
         addClassButton.addActionListener(e -> {
             showAddClassDialog();
-            refreshClassesList();
+            loadClasses.run(); // REFRESH
         });
 
+        // DELETE CLASS
         deleteClassButton.addActionListener(e -> {
-            int row = table.getSelectedRow();
+            SchoolClass selected = classList.getSelectedValue();
 
-            if (row == -1) {
+            if (selected == null) {
                 JOptionPane.showMessageDialog(frame, "Select a class to delete!");
                 return;
             }
 
-            int id = (int) table.getValueAt(row, 0);
+            dao.deleteClass(selected.getId());
 
-            dao.deleteClass(id);
-
-            model.removeRow(row);
+            loadClasses.run(); // REFRESH
         });
 
         frame.add(mainPanel);
         frame.setVisible(true);
     }
+
 
     public void showAddClassDialog() {
 
