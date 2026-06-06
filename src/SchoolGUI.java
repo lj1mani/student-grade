@@ -331,35 +331,107 @@ public class SchoolGUI extends JFrame {
 
     public void showAddStudentDialog(SchoolClass schoolClass, DefaultListModel<Student> model) {
 
-        JTextField firstName = new JTextField(10);
-        JTextField lastName = new JTextField(10);
+        JTextField firstNameField = new JTextField(15);
+        JTextField lastNameField = new JTextField(15);
 
-        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+        while (true) {
 
-        panel.add(new JLabel("First Name:"));
-        panel.add(firstName);
+            JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
 
-        panel.add(new JLabel("Last Name:"));
-        panel.add(lastName);
+            panel.add(new JLabel("First Name:"));
+            panel.add(firstNameField);
 
-        int result = JOptionPane.showConfirmDialog(
-                null,
-                panel,
-                "Add Student",
-                JOptionPane.OK_CANCEL_OPTION
-        );
+            panel.add(new JLabel("Last Name:"));
+            panel.add(lastNameField);
 
-        if (result == JOptionPane.OK_OPTION) {
-
-            SchoolDAO dao = new SchoolDAO();
-
-            dao.addStudent(
-                    firstName.getText(),
-                    lastName.getText(),
-                    schoolClass.getId()
+            int result = JOptionPane.showConfirmDialog(
+                    null,
+                    panel,
+                    "Add Student",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE
             );
 
-            refreshStudentsList(model, schoolClass.getId(), dao);
+            // User clicked Cancel or closed the dialog
+            if (result != JOptionPane.OK_OPTION) {
+                return;
+            }
+
+            String firstName = firstNameField.getText().trim();
+            String lastName = lastNameField.getText().trim();
+
+            // Validate First Name
+            if (firstName.isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        null,
+                        "First Name cannot be empty.",
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                continue;
+            }
+
+            // Validate Last Name
+            if (lastName.isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Last Name cannot be empty.",
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                continue;
+            }
+
+            // Optional: minimum length validation
+            if (firstName.length() < 2) {
+                JOptionPane.showMessageDialog(
+                        null,
+                        "First Name must contain at least 2 characters.",
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                continue;
+            }
+
+            if (lastName.length() < 2) {
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Last Name must contain at least 2 characters.",
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                continue;
+            }
+
+            try {
+                SchoolDAO dao = new SchoolDAO();
+
+                dao.addStudent(
+                        firstName,
+                        lastName,
+                        schoolClass.getId()
+                );
+
+                refreshStudentsList(model, schoolClass.getId(), dao);
+
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Student added successfully.",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+
+                return; // close method after successful add
+
+            } catch (Exception ex) {
+
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Failed to add student.\n\n" + ex.getMessage(),
+                        "Database Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
         }
     }
 
