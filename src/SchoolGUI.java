@@ -39,24 +39,18 @@ public class SchoolGUI extends JFrame {
 
         // TOP BUTTONS
         JButton addClassButton = new JButton("Add Class");
-        JButton deleteClassButton = new JButton("Delete Class");
-
         addClassButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        deleteClassButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-
         addClassButton.setBackground(new Color(0, 122, 255));
         addClassButton.setForeground(Color.WHITE);
+        addClassButton.setFocusPainted(false);
+        addClassButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        addClassButton.setMargin(new Insets(8, 16, 8, 16));
 
+        JButton deleteClassButton = new JButton("Delete Class");
         deleteClassButton.setBackground(new Color(220, 53, 69));
         deleteClassButton.setForeground(Color.WHITE);
-
-        addClassButton.setFocusPainted(false);
         deleteClassButton.setFocusPainted(false);
-
-        addClassButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         deleteClassButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        addClassButton.setMargin(new Insets(8, 16, 8, 16));
         deleteClassButton.setMargin(new Insets(8, 16, 8, 16));
 
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
@@ -301,18 +295,39 @@ public class SchoolGUI extends JFrame {
 
     public void showStudentsWindow(SchoolClass schoolClass) {
 
-        dao = new SchoolDAO();
+        SchoolDAO dao = new SchoolDAO();
 
         JFrame frame = new JFrame("Students - " + schoolClass.getClassName());
         frame.setSize(600, 500);
         frame.setLocationRelativeTo(null);
-
+        
+        // MODEL + LIST
         DefaultListModel<Student> model = new DefaultListModel<>();
-
         JList<Student> list = new JList<>(model);
 
+        list.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        list.setSelectionBackground(new Color(230, 242, 255));
+        list.setSelectionForeground(new Color(0, 122, 255));
+        list.setFixedCellHeight(30);
+
+        // LOAD DATA
         refreshStudentsList(model, schoolClass.getId(), dao);
 
+        // SCROLL PANE
+        JScrollPane scrollPane = new JScrollPane(list);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE);
+
+        // TITLE
+        JLabel titleLabel = new JLabel("Students in " + schoolClass.getClassName());
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+
+        JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
+        centerPanel.setBackground(Color.WHITE);
+        centerPanel.add(titleLabel, BorderLayout.NORTH);
+        centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // BUTTONS
         JButton addStudentButton = new JButton("Add Student");
         addStudentButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         addStudentButton.setBackground(new Color(0, 122, 255));
@@ -321,30 +336,33 @@ public class SchoolGUI extends JFrame {
         addStudentButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         addStudentButton.setMargin(new Insets(8, 16, 8, 16));
 
+
         JButton deleteStudentButton = new JButton("Delete Student");
-        deleteStudentButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         deleteStudentButton.setBackground(new Color(220, 53, 69));
         deleteStudentButton.setForeground(Color.WHITE);
         deleteStudentButton.setFocusPainted(false);
         deleteStudentButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         deleteStudentButton.setMargin(new Insets(8, 16, 8, 16));
-
-        addStudentButton.addActionListener(e -> showAddStudentDialog(schoolClass, model));
-
         deleteStudentButton.setEnabled(false);
 
+        // enable delete only when selected
         list.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 deleteStudentButton.setEnabled(list.getSelectedValue() != null);
             }
         });
 
+        // ACTIONS
+        addStudentButton.addActionListener(e ->
+                showAddStudentDialog(schoolClass, model)
+        );
+
         deleteStudentButton.addActionListener(e -> {
 
             Student selected = list.getSelectedValue();
 
             if (selected == null) {
-                JOptionPane.showMessageDialog(null,
+                JOptionPane.showMessageDialog(frame,
                         "Please select a student!",
                         "Warning",
                         JOptionPane.WARNING_MESSAGE);
@@ -352,7 +370,7 @@ public class SchoolGUI extends JFrame {
             }
 
             int confirm = JOptionPane.showConfirmDialog(
-                    null,
+                    frame,
                     "Delete student " + selected.getFirstName() + " " + selected.getLastName() + "?",
                     "Confirm Delete",
                     JOptionPane.YES_NO_OPTION
@@ -360,21 +378,26 @@ public class SchoolGUI extends JFrame {
 
             if (confirm == JOptionPane.YES_OPTION) {
 
-                SchoolDAO dao = new SchoolDAO();
                 dao.deleteStudent(selected.getId());
-
                 refreshStudentsList(model, schoolClass.getId(), dao);
             }
         });
 
-        JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // TOP PANEL
+        JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        top.setBackground(Color.WHITE);
         top.add(addStudentButton);
         top.add(deleteStudentButton);
 
-        frame.setLayout(new BorderLayout());
-        frame.add(top, BorderLayout.NORTH);
-        frame.add(new JScrollPane(list), BorderLayout.CENTER);
+        // MAIN LAYOUT
+        JPanel mainPanel = new JPanel(new BorderLayout(0, 15));
+        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        mainPanel.setBackground(Color.WHITE);
 
+        mainPanel.add(top, BorderLayout.NORTH);
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
+
+        frame.add(mainPanel);
         frame.setVisible(true);
     }
 
