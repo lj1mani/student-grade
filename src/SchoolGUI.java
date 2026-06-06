@@ -25,7 +25,7 @@ public class SchoolGUI extends JFrame {
             System.err.println("Failed to initialize LaF");
         }
 
-         dao = new SchoolDAO();
+        SchoolDAO dao = new SchoolDAO();
 
         JFrame frame = new JFrame("School Management");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -39,19 +39,24 @@ public class SchoolGUI extends JFrame {
 
         // TOP BUTTONS
         JButton addClassButton = new JButton("Add Class");
+        JButton deleteClassButton = new JButton("Delete Class");
+
         addClassButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        deleteClassButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
         addClassButton.setBackground(new Color(0, 122, 255));
         addClassButton.setForeground(Color.WHITE);
-        addClassButton.setFocusPainted(false);
-        addClassButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        addClassButton.setMargin(new Insets(8, 16, 8, 16));
 
-        JButton deleteClassButton = new JButton("Delete Class");
-        deleteClassButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         deleteClassButton.setBackground(new Color(220, 53, 69));
         deleteClassButton.setForeground(Color.WHITE);
+
+        addClassButton.setFocusPainted(false);
         deleteClassButton.setFocusPainted(false);
+
+        addClassButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         deleteClassButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        addClassButton.setMargin(new Insets(8, 16, 8, 16));
         deleteClassButton.setMargin(new Insets(8, 16, 8, 16));
 
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
@@ -61,7 +66,7 @@ public class SchoolGUI extends JFrame {
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
-        // LIST MODEL
+        // LIST + MODEL
         DefaultListModel<SchoolClass> listModel = new DefaultListModel<>();
         JList<SchoolClass> classList = new JList<>(listModel);
 
@@ -70,23 +75,6 @@ public class SchoolGUI extends JFrame {
         classList.setSelectionForeground(new Color(0, 122, 255));
         classList.setFixedCellHeight(35);
 
-        JScrollPane scrollPane = new JScrollPane(classList);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getViewport().setBackground(Color.WHITE);
-
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
-
-        // LOAD DATA METHOD (IMPORTANT)
-        Runnable loadClasses = () -> {
-            listModel.clear();
-            for (SchoolClass sc : dao.getAllClasses()) {
-                listModel.addElement(sc);
-            }
-        };
-
-        loadClasses.run();
-
-        // MAKE JLIST SHOW NAME ONLY
         classList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
             JLabel label = new JLabel(value.getClassName());
             label.setOpaque(true);
@@ -102,7 +90,33 @@ public class SchoolGUI extends JFrame {
             return label;
         });
 
-        // DOUBLE CLICK -> OPEN STUDENTS
+        JScrollPane scrollPane = new JScrollPane(classList);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE);
+
+
+        // TITLE + CENTER PANEL
+        JLabel titleLabel = new JLabel("All Classes");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+
+        JPanel centerPanel = new JPanel(new BorderLayout(5, 10));
+        centerPanel.setBackground(Color.WHITE);
+        centerPanel.add(titleLabel, BorderLayout.NORTH);
+        centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
+
+        // LOAD DATA
+        Runnable loadClasses = () -> {
+            listModel.clear();
+            for (SchoolClass sc : dao.getAllClasses()) {
+                listModel.addElement(sc);
+            }
+        };
+
+        loadClasses.run();
+
+        // DOUBLE CLICK -> STUDENTS
         classList.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
@@ -120,11 +134,12 @@ public class SchoolGUI extends JFrame {
         // ADD CLASS
         addClassButton.addActionListener(e -> {
             showAddClassDialog();
-            loadClasses.run(); // REFRESH
+            loadClasses.run();
         });
 
         // DELETE CLASS
         deleteClassButton.addActionListener(e -> {
+
             SchoolClass selected = classList.getSelectedValue();
 
             if (selected == null) {
@@ -133,8 +148,7 @@ public class SchoolGUI extends JFrame {
             }
 
             dao.deleteClass(selected.getId());
-
-            loadClasses.run(); // REFRESH
+            loadClasses.run();
         });
 
         frame.add(mainPanel);
