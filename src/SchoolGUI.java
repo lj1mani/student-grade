@@ -14,8 +14,8 @@ public class SchoolGUI extends JFrame {
     private SchoolClass lastSelectedClass = null;
     private SchoolDAO dao;
 
-    /* ******************************************* */
-    /* ************ CLASS ********************* */
+    /* ***************************************************************** */
+    /* ************ CLASS ********************************************** */
 
     public void showClassesWindow() {
 
@@ -282,8 +282,8 @@ public class SchoolGUI extends JFrame {
         }
     }
 
-    /* ******************************************* */
-    /* ************ STUDENST ********************* */
+    /* ***************************************************************** */
+    /* ************ STUDENST ******************************************* */
 
     public void showStudentsWindow(SchoolClass schoolClass) {
 
