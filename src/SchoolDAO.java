@@ -159,7 +159,7 @@ public class SchoolDAO {
 
     public void deleteStudent(int studentId) {
 
-        String sql = "DELETE FROM students WHERE id = ?";
+        String sql = "DELETE FROM students WHERE student_id = ?";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

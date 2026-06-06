@@ -12,6 +12,7 @@ public class SchoolGUI extends JFrame {
     private DefaultListModel<SchoolClass> classListModel;
     private JList<SchoolClass> classList;
     private SchoolClass lastSelectedClass = null;
+    private SchoolDAO dao;
 
     /* ******************************************* */
     /* ************ CLASS ********************* */
@@ -24,7 +25,7 @@ public class SchoolGUI extends JFrame {
             System.err.println("Failed to initialize LaF");
         }
 
-        SchoolDAO dao = new SchoolDAO();
+         dao = new SchoolDAO();
 
         JFrame frame = new JFrame("School Management");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -189,7 +190,7 @@ public class SchoolGUI extends JFrame {
                 return;
             }
 
-            SchoolDAO dao = new SchoolDAO();
+            dao = new SchoolDAO();
 
             if (dao.addClass(className)) {
 
@@ -214,7 +215,7 @@ public class SchoolGUI extends JFrame {
 
     public void refreshClassesList() {
 
-        SchoolDAO dao = new SchoolDAO();
+        dao = new SchoolDAO();
 
         classListModel.clear();
 
@@ -225,7 +226,7 @@ public class SchoolGUI extends JFrame {
 
     public void showDeleteClassDialog() {
 
-        SchoolDAO dao = new SchoolDAO();
+        dao = new SchoolDAO();
 
         List<SchoolClass> classes = dao.getAllClasses();
 
@@ -286,7 +287,7 @@ public class SchoolGUI extends JFrame {
 
     public void showStudentsWindow(SchoolClass schoolClass) {
 
-        SchoolDAO dao = new SchoolDAO();
+        dao = new SchoolDAO();
 
         JFrame frame = new JFrame("Students - " + schoolClass.getClassName());
         frame.setSize(600, 500);
@@ -306,10 +307,55 @@ public class SchoolGUI extends JFrame {
         addStudentButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         addStudentButton.setMargin(new Insets(8, 16, 8, 16));
 
+        JButton deleteStudentButton = new JButton("Delete Student");
+        deleteStudentButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        deleteStudentButton.setBackground(new Color(220, 53, 69));
+        deleteStudentButton.setForeground(Color.WHITE);
+        deleteStudentButton.setFocusPainted(false);
+        deleteStudentButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        deleteStudentButton.setMargin(new Insets(8, 16, 8, 16));
+
         addStudentButton.addActionListener(e -> showAddStudentDialog(schoolClass, model));
+
+        deleteStudentButton.setEnabled(false);
+
+        list.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                deleteStudentButton.setEnabled(list.getSelectedValue() != null);
+            }
+        });
+
+        deleteStudentButton.addActionListener(e -> {
+
+            Student selected = list.getSelectedValue();
+
+            if (selected == null) {
+                JOptionPane.showMessageDialog(null,
+                        "Please select a student!",
+                        "Warning",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int confirm = JOptionPane.showConfirmDialog(
+                    null,
+                    "Delete student " + selected.getFirstName() + " " + selected.getLastName() + "?",
+                    "Confirm Delete",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            if (confirm == JOptionPane.YES_OPTION) {
+
+                SchoolDAO dao = new SchoolDAO();
+                dao.deleteStudent(selected.getId());
+
+                refreshStudentsList(model, schoolClass.getId(), dao);
+            }
+        });
 
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
         top.add(addStudentButton);
+        top.add(deleteStudentButton);
 
         frame.setLayout(new BorderLayout());
         frame.add(top, BorderLayout.NORTH);
@@ -402,7 +448,7 @@ public class SchoolGUI extends JFrame {
             }
 
             try {
-                SchoolDAO dao = new SchoolDAO();
+                dao = new SchoolDAO();
 
                 dao.addStudent(
                         firstName,
