@@ -615,5 +615,112 @@ public class SchoolGUI extends JFrame {
     }
 
 
+    /* ***************************************************************** */
+    /* ************ GRADES ******************************************* */
+
+    public void showGradesWindow(Student student) {
+
+        dao = new SchoolDAO();
+
+        JFrame frame = new JFrame("Grades - " + student.getFirstName() + " " + student.getLastName());
+        frame.setSize(500, 500);
+        frame.setLocationRelativeTo(null);
+
+        DefaultListModel<GradeView> model = new DefaultListModel<>();
+        JList<GradeView> list = new JList<>(model);
+
+        list.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+        // refresh method
+        Runnable refresh = () -> {
+            model.clear();
+
+            for (GradeView g : dao.getGradesForStudent(student.getId())) {
+                model.addElement(g);
+            }
+        };
+
+        refresh.run();
+
+        JButton addGradeButton = new JButton("Add Grade");
+        addGradeButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        addGradeButton.setBackground(new Color(0, 122, 255));
+        addGradeButton.setForeground(Color.WHITE);
+        addGradeButton.setFocusPainted(false);
+        addGradeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        addGradeButton.addActionListener(e -> showAddGradeDialog(student, refresh));
+
+        JButton deleteGradeButton = new JButton("Delete Grade");
+        deleteGradeButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        deleteGradeButton.setBackground(new Color(220, 53, 69));
+        deleteGradeButton.setForeground(Color.WHITE);
+        deleteGradeButton.setFocusPainted(false);
+        deleteGradeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        deleteGradeButton.addActionListener(e -> {
+
+            GradeView selected = list.getSelectedValue();
+
+            if (selected == null) {
+                JOptionPane.showMessageDialog(frame, "Select a grade!");
+                return;
+            }
+
+            // simple delete logic (optional improvement later)
+            JOptionPane.showMessageDialog(frame, "Delete by ID not implemented yet");
+        });
+
+        JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        top.add(addGradeButton);
+        top.add(deleteGradeButton);
+
+        frame.setLayout(new BorderLayout());
+        frame.add(top, BorderLayout.NORTH);
+        frame.add(new JScrollPane(list), BorderLayout.CENTER);
+
+        frame.setVisible(true);
+    }
+
+
+    public void showAddGradeDialog(Student student, Runnable refresh) {
+
+        SchoolDAO dao = new SchoolDAO();
+
+        List<Subject> subjects = dao.getSubjectsByClass(student.getClassId());
+
+        JComboBox<Subject> subjectBox = new JComboBox<>();
+        for (Subject s : subjects) {
+            subjectBox.addItem(s);
+        }
+
+        Integer[] grades = {1, 2, 3, 4, 5};
+        JComboBox<Integer> gradeBox = new JComboBox<>(grades);
+
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+        panel.add(new JLabel("Subject:"));
+        panel.add(subjectBox);
+        panel.add(new JLabel("Grade:"));
+        panel.add(gradeBox);
+
+        int result = JOptionPane.showConfirmDialog(
+                null,
+                panel,
+                "Add Grade",
+                JOptionPane.OK_CANCEL_OPTION
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+
+            Subject subject = (Subject) subjectBox.getSelectedItem();
+            int grade = (Integer) gradeBox.getSelectedItem();
+
+            dao.addGrade(student.getId(), subject.getId(), grade);
+
+            refresh.run();
+        }
+    }
+
+
 
 }

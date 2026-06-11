@@ -247,4 +247,59 @@ public class SchoolDAO {
     }
 
 
+    /* ******************************************* */
+    /* ************ GRADES ********************* */
+
+    public boolean addGrade(int studentId, int subjectId, int grade) {
+
+        String sql =
+                "INSERT INTO grades(student_id, subject_id, grade) " +
+                        "VALUES (?, ?, ?)";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, studentId);
+            stmt.setInt(2, subjectId);
+            stmt.setInt(3, grade);
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<GradeView> getGradesForStudent(int studentId) {
+
+        List<GradeView> list = new ArrayList<>();
+
+        String sql =
+                "SELECT s.subject_name, g.grade " +
+                        "FROM grades g " +
+                        "JOIN subjects s ON g.subject_id = s.subject_id " +
+                        "WHERE g.student_id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, studentId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+
+                list.add(new GradeView(
+                        rs.getString("subject_name"),
+                        rs.getInt("grade")
+                ));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
 }

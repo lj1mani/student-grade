@@ -1,29 +1,30 @@
 public class Grade {
 
     private int id;
-    private String subjectName;
-    private int gradeValue;
+    private int studentId;
+    private int subjectId;
+    private int grade;
 
-    public Grade(int id, String subjectName, int gradeValue) {
+    public Grade(int id, int studentId, int subjectId, int grade) {
         this.id = id;
-        this.subjectName = subjectName;
-        this.gradeValue = gradeValue;
+        this.studentId = studentId;
+        this.subjectId = subjectId;
+        this.grade = grade;
     }
 
     public int getId() {
         return id;
     }
 
-    public String getSubjectName() {
-        return subjectName;
+    public int getStudentId() {
+        return studentId;
     }
 
-    public int getGradeValue() {
-        return gradeValue;
+    public int getSubjectId() {
+        return subjectId;
     }
 
-    @Override
-    public String toString() {
-        return subjectName + " : " + gradeValue;
+    public int getGrade() {
+        return grade;
     }
 }
