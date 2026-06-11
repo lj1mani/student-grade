@@ -300,7 +300,7 @@ public class SchoolGUI extends JFrame {
         JFrame frame = new JFrame("Students - " + schoolClass.getClassName());
         frame.setSize(600, 500);
         frame.setLocationRelativeTo(null);
-        
+
         // MODEL + LIST
         DefaultListModel<Student> model = new DefaultListModel<>();
         JList<Student> list = new JList<>(model);
@@ -345,6 +345,14 @@ public class SchoolGUI extends JFrame {
         deleteStudentButton.setMargin(new Insets(8, 16, 8, 16));
         deleteStudentButton.setEnabled(false);
 
+        JButton manageSubjectsButton = new JButton("Manage Subjects");
+        manageSubjectsButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        manageSubjectsButton.setBackground(new Color(0, 122, 255));
+        manageSubjectsButton.setForeground(Color.WHITE);
+        manageSubjectsButton.setFocusPainted(false);
+        manageSubjectsButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        manageSubjectsButton.setMargin(new Insets(8, 16, 8, 16));
+
         // enable delete only when selected
         list.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -383,11 +391,16 @@ public class SchoolGUI extends JFrame {
             }
         });
 
+        manageSubjectsButton.addActionListener(e ->
+                showSubjectsWindow(schoolClass)
+        );
+
         // TOP PANEL
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         top.setBackground(Color.WHITE);
         top.add(addStudentButton);
         top.add(deleteStudentButton);
+        top.add(manageSubjectsButton);
 
         // MAIN LAYOUT
         JPanel mainPanel = new JPanel(new BorderLayout(0, 15));
@@ -514,6 +527,91 @@ public class SchoolGUI extends JFrame {
                 );
             }
         }
+    }
+
+    public void showSubjectsWindow(SchoolClass schoolClass) {
+
+        JFrame frame = new JFrame("Subjects - " + schoolClass.getClassName());
+
+        frame.setSize(500, 400);
+        frame.setLocationRelativeTo(null);
+
+        SchoolDAO dao = new SchoolDAO();
+
+        DefaultListModel<Subject> model = new DefaultListModel<>();
+
+        JList<Subject> list = new JList<>(model);
+
+        Runnable loadSubjects = () -> {
+
+            model.clear();
+
+            for (Subject subject : dao.getSubjectsByClass(schoolClass.getId())) {
+                model.addElement(subject);
+            }
+        };
+
+        loadSubjects.run();
+
+        JButton addButton = new JButton("Add Subject");
+        addButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        addButton.setBackground(new Color(0, 122, 255));
+        addButton.setForeground(Color.WHITE);
+        addButton.setFocusPainted(false);
+        addButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        addButton.setMargin(new Insets(8, 16, 8, 16));
+
+        JButton deleteButton = new JButton("Delete Subject");
+        deleteButton.setBackground(new Color(220, 53, 69));
+        deleteButton.setForeground(Color.WHITE);
+        deleteButton.setFocusPainted(false);
+        deleteButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        deleteButton.setMargin(new Insets(8, 16, 8, 16));
+        deleteButton.setEnabled(false);
+
+
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        topPanel.add(addButton);
+        topPanel.add(deleteButton);
+
+        addButton.addActionListener(e -> {
+
+            String subjectName = JOptionPane.showInputDialog(
+                    frame,
+                    "Subject name:"
+            );
+
+            if (subjectName != null && !subjectName.trim().isEmpty()) {
+
+                dao.addSubject(
+                        subjectName.trim(),
+                        schoolClass.getId()
+                );
+
+                loadSubjects.run();
+            }
+        });
+
+        deleteButton.addActionListener(e -> {
+
+            Subject selected = list.getSelectedValue();
+
+            if (selected == null) {
+                return;
+            }
+
+            dao.deleteSubject(selected.getId());
+
+            loadSubjects.run();
+        });
+
+        frame.setLayout(new BorderLayout());
+
+        frame.add(topPanel, BorderLayout.NORTH);
+        frame.add(new JScrollPane(list), BorderLayout.CENTER);
+
+        frame.setVisible(true);
     }
 
 

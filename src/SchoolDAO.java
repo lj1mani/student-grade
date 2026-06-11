@@ -172,5 +172,79 @@ public class SchoolDAO {
         }
     }
 
+    /* ******************************************* */
+    /* ************ SUBJECTS ********************* */
+
+    public boolean addSubject(String subjectName, int classId) {
+
+        String sql =
+                "INSERT INTO subjects(subject_name, class_id) VALUES (?, ?)";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, subjectName);
+            stmt.setInt(2, classId);
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<Subject> getSubjectsByClass(int classId) {
+
+        List<Subject> subjects = new ArrayList<>();
+
+        String sql =
+                "SELECT subject_id, subject_name, class_id " +
+                        "FROM subjects " +
+                        "WHERE class_id = ? " +
+                        "ORDER BY subject_name";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, classId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+
+                subjects.add(
+                        new Subject(
+                                rs.getInt("subject_id"),
+                                rs.getString("subject_name"),
+                                rs.getInt("class_id")
+                        )
+                );
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return subjects;
+    }
+
+    public boolean deleteSubject(int subjectId) {
+
+        String sql = "DELETE FROM subjects WHERE subject_id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, subjectId);
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
 }

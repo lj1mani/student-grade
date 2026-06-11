@@ -1,24 +1,29 @@
 public class Subject {
 
     private int id;
-    private String name;
+    private String subjectName;
+    private int classId;
 
-    public Subject(int id, String name) {
+    public Subject(int id, String subjectName, int classId) {
         this.id = id;
-        this.name = name;
+        this.subjectName = subjectName;
+        this.classId = classId;
     }
 
     public int getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getSubjectName() {
+        return subjectName;
+    }
+
+    public int getClassId() {
+        return classId;
     }
 
     @Override
     public String toString() {
-        return name;
+        return subjectName;
     }
-
 }

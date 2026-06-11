@@ -1,36 +1,29 @@
-import java.time.LocalDate;
-
 public class Grade {
 
     private int id;
-    private Student student;
-    private Subject subject;
-    private int grade;
-    private LocalDate date;
+    private String subjectName;
+    private int gradeValue;
 
-    public Grade(int id, Student student, Subject subject,
-                 int grade, LocalDate date) {
-
+    public Grade(int id, String subjectName, int gradeValue) {
         this.id = id;
-        this.student = student;
-        this.subject = subject;
-        this.grade = grade;
-        this.date = date;
+        this.subjectName = subjectName;
+        this.gradeValue = gradeValue;
     }
 
-    public int getGrade() {
-        return grade;
+    public int getId() {
+        return id;
     }
 
-    public Student getStudent() {
-        return student;
+    public String getSubjectName() {
+        return subjectName;
     }
 
-    public Subject getSubject() {
-        return subject;
+    public int getGradeValue() {
+        return gradeValue;
     }
 
-    public LocalDate getDate() {
-        return date;
+    @Override
+    public String toString() {
+        return subjectName + " : " + gradeValue;
     }
 }

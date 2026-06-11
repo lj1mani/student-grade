@@ -49,9 +49,56 @@ public class DatabaseManager {
         }
     }
 
+    public static void ensureSubjectsTable() {
+
+        String sql =
+                "CREATE TABLE IF NOT EXISTS subjects (" +
+                        "subject_id INT AUTO_INCREMENT PRIMARY KEY," +
+                        "subject_name VARCHAR(50) NOT NULL," +
+                        "class_id INT NOT NULL," +
+                        "FOREIGN KEY (class_id) REFERENCES classes(class_id) ON DELETE CASCADE" +
+                        ")";
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            stmt.execute(sql);
+
+            System.out.println("Subjects table ready.");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void ensureGradesTable() {
+
+        String sql =
+                "CREATE TABLE IF NOT EXISTS grades (" +
+                        "grade_id INT AUTO_INCREMENT PRIMARY KEY," +
+                        "student_id INT NOT NULL," +
+                        "subject_id INT NOT NULL," +
+                        "grade_value INT NOT NULL," +
+                        "FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE," +
+                        "FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE CASCADE" +
+                        ")";
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            stmt.execute(sql);
+
+            System.out.println("Grades table ready.");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     ////////////// INITALIZATION ///////////////////////////////////////////////////////////////
     public static void initDatabase() {
         ensureClassesTable();
+        //ensureSubjectsTable();
+        //ensureGradesTable();
     }
 
     }
